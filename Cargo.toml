@@ -1,0 +1,18 @@
+[package]
+name = "nifpgafifo2zmq"
+version = "0.1.0"
+edition = "2021"
+
+build = "build.rs"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+fehler = "1.0.0"
+sysinfo = "0.29.0"
+nifpga-sys = { path = "../nifpga-rs-dbtaylor/nifpga-sys" } # "0.1.3"
+nifpga-type-macro = { path = "../nifpga-rs-dbtaylor/nifpga-type-macro" } # "0.1.3"
+nifpga = { path = "../nifpga-rs-dbtaylor/nifpga" } # "0.1.3"
+
+[build-dependencies]
+cc = "1.0.54"
