@@ -2,10 +2,17 @@ extern crate nifpga;
 
 use std::path::PathBuf;
 use std::process;
+use std::time::Duration;
+
+use std::thread;
+use std::thread::available_parallelism;
+use std::sync::mpsc;
+use std::sync::mpsc::SyncSender;
+
+
 use clap::{Parser};
 use nifpga::{NifpgaError, Session, ReadFifo, WriteFifo, ReadElements};
-use std::thread;
-use std::sync::mpsc;
+
 
 
 #[derive(Parser)]
@@ -41,6 +48,7 @@ struct Cli {
     port: Option<usize>,
 }
 
+#[derive(Clone)]
 struct Configuration {
     bit_file: String,
     signature: String,
@@ -125,14 +133,45 @@ fn import_args_as_configuration() -> Configuration{
     conf
 }
 
+fn zmq_loop(mut conf: &Configuration, rx:std::sync::mpsc::Receiver<Vec<u64>>) {
+    let ctx = zmq::Context::new();
+    let socket = ctx.socket(zmq::PUSH).unwrap();
+    let tcp_string = "tcp://127.0.0.1:".to_string() + &conf.port.to_string();
+    println!("Connected {}", tcp_string);
+    socket.connect(&tcp_string).unwrap();
+    println!("Connected to {}!",tcp_string);
+    println!("zmq_loop started");
+    loop {
+        // println!("rx.recv()");
+        match rx.recv() {
+            Ok(chunk) => {
 
-// thread::spawn(move || {
-//
-// });
+                let (head, chunk_u8, tail) = unsafe { chunk.align_to::<u8>() };
+                assert!(head.is_empty()); //paranoid check that the previous call was not messing up
+                assert!(tail.is_empty());
 
 
-fn main() -> Result<(), NifpgaError>{
-   let conf = import_args_as_configuration();
+                if chunk.len()>0 {
+                    match socket.send(chunk_u8, 0) {
+                        Ok(T) => {
+                            println!("{} {}", chunk.len(), chunk_u8.len());
+                        }
+                        Err(E) => {
+                            println!("ERR {:?}", E);
+                        }
+                    }
+                }
+            }
+            Err(E) => {
+                println!("{:?}",E);
+                // The sender channel was closed, exit the loop
+                //break;
+            },
+        }
+    }
+}
+
+fn fpga_loop(mut conf: &Configuration, tx:std::sync::mpsc::SyncSender<Vec<u64>>) -> Result<(), NifpgaError> {
 
     let session = Session::open(
         conf.bit_file.as_str(),
@@ -147,37 +186,39 @@ fn main() -> Result<(), NifpgaError>{
     println!("Actual FIFO {} set depth: {} actual depth: {}", conf.fifo, conf.dma_buffer_size, depth);
     println!("conf.fifo_reading_buffer: {}", conf.fifo_reading_buffer);
 
+    let mut read_buff:Vec<u64> = Vec::with_capacity(conf.fifo_reading_buffer);
+    read_buff.resize(conf.fifo_reading_buffer, 0);
 
-    //read_buff.resize(conf.fifo_reading_buffer, 0);
-   // let (tx, rx) = mpsc::channel();
-
-        let mut read_buff:Vec<u64> = Vec::with_capacity(conf.fifo_reading_buffer);
-        read_buff.resize(conf.fifo_reading_buffer, 0);
-
-        let mut read_buff_zerosized:Vec<u64> = Vec::with_capacity(0);
-
-        loop {
-            let data_available = reader.read(&mut read_buff_zerosized, 0)?;
-            if (data_available>0) {
-                read_buff.resize(data_available, 0);
-                let r = reader.read(&mut read_buff, 0)?;
-                println!("r {:?} {:?}", data_available, r);
-               // tx.send(read_buff.to_vec());
-            }
-        }
-
-
-
+    let mut read_buff_zero_size:Vec<u64> = Vec::with_capacity(0);
 
     loop {
-        println!("Received {:?}", rx.recv());
+        let data_available = reader.read(&mut read_buff_zero_size, 0)?;
+        if (data_available>0) {
+            read_buff.resize(data_available, 0);
+            let r = reader.read(&mut read_buff, 0)?;
+            //println!("r {:?} {:?}", data_available, r);
+            tx.send(read_buff.to_vec());
+        }
     }
 
-
-
-
-
     Ok(())
+}
+
+
+
+
+fn main() -> Result<(), NifpgaError>{
+    let mut conf = import_args_as_configuration();
+    let mut conf2 = conf.clone();
+    let channel_buffer_size = 10000;
+
+    let (tx,rx) = mpsc::sync_channel(channel_buffer_size);
+
+    let t1= thread::spawn(move || {
+            let _ = zmq_loop(&conf2.clone(),rx);
+    });
+
+    fpga_loop(&conf,tx)
 }
 
 
