@@ -3,11 +3,13 @@ name = "nifpga-fifo-to-zmq"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+authors = ["Mattia Donato"]
+about = "NI FPGA FIFOs reader to ZMQ PULL"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.0", features = ["derive"] }
+clap = { version = "4.2.7", features = ["derive", "cargo"] }
 fehler = "1.0.0"
 sysinfo = "0.29.0"
 crossbeam = "0.8"

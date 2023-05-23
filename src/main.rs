@@ -17,7 +17,11 @@ use nifpga::{NifpgaError, Session, ReadFifo, WriteFifo, ReadElements};
 
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None, arg_required_else_help(true))]
+#[command(name = "nifpga-fifo-to-zmq")]
+#[command(author = "Mattia Donato")]
+#[command(version = "1.0")]
+#[command(about = "Read data from NI FPGA FIFO and transmit data via ZMQ PUSH.")]
+#[command(arg_required_else_help(true))]
 struct Cli {
     /// Set the bit_file name
     bit_file: Option<PathBuf>,
@@ -176,7 +180,7 @@ fn zmq_loop(mut conf: &Configuration, rx: crossbeam::channel::Receiver<Vec<u64>>
             Err(E) => {
                 println!("{:?}",E);
                 // The sender channel was closed, exit the loop
-                //break;
+                process::exit(0x0100);
             },
         }
     }
