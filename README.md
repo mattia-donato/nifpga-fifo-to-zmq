@@ -35,9 +35,10 @@ Options:
 
 ### Why `cargo build` give a linker error: `note: LINK : fatal error LNK1181: cannot open input file NiFpga.lib`? ###
 
-The nifpga-rs compilation needs both `NiFpga.lib` and `NiFpga.dll`. Unfortunatly, to my knowledge NI distributest only the `NiFpga.dll` with LabView and not the `.lib`.
-You will find it on `C:\Windows\SysWOW64` or `C:\Windows\System32`.
-The `nifpga.lib` can be generated starting from the `nifpga.dll` the following steps.
+The nifpga-rs compilation needs both `NiFpga.lib` and `NiFpga.dll`. Unfortunatly, to my knowledge NI distributes with LabView only the dymamic library `NiFpga.dll` and but it does not provide the static library `NiFpga.lib`.
+
+You can find `nifpga.dll` on `C:\Windows\SysWOW64` or `C:\Windows\System32` and the `nifpga.lib` can be generated starting from the `nifpga.dll` the following steps.
+
 
 Create a folder and copy there `nifpga.dll` file. Then from the Visual Studio developer Powershell open `cmd.exe`
 
