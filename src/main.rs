@@ -178,7 +178,7 @@ fn zmq_loop(mut conf: &Configuration, rx: crossbeam::channel::Receiver<Vec<u64>>
                 }
             }
             Err(E) => {
-                println!("{:?}",E);
+                println!("zmq_loop () {:?}",E);
                 // The sender channel was closed, exit the loop
                 process::exit(0x0100);
             },
@@ -243,14 +243,14 @@ fn main() -> Result<(), NifpgaError>{
 
     let (tx,rx) = crossbeam::channel::unbounded();
 
-    println!("A");
+    println!("Start two threads.");
 
     crossbeam::thread::scope( |s| {
         let t1 = s.spawn(move |_| zmq_loop(&conf2.clone(),rx));
         let t2 = s.spawn(move |_| fpga_loop(&conf,tx));
     }).unwrap();
 
-    println!("B");
+    println!("End two threads.");
 
     Ok(())
 }
