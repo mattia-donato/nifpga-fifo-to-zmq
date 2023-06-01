@@ -198,7 +198,7 @@ fn fpga_loop(mut conf: &Configuration, tx: crossbeam::channel::Sender<Vec<u64>>)
 
     let (reader, depth) = session.open_read_fifo::<u64>(conf.fifo, conf.dma_buffer_size)?;
 
-    println!("Actual DMA FIFO {} set depth: {} actual depth: {}", conf.fifo, conf.dma_buffer_size, depth);
+    println!("Actual DMA FIFO  {} set depth: {} actual depth: {}", conf.fifo, conf.dma_buffer_size, depth);
     println!("conf.fifo_reading_buffer: {}", conf.fifo_reading_buffer);
 
     let mut read_buff:Vec<u64> = Vec::with_capacity(conf.fifo_reading_buffer);
