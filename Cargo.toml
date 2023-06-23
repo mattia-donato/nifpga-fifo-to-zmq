@@ -1,6 +1,6 @@
 [package]
 name = "nifpga-fifo-to-zmq"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 authors = ["Mattia Donato"]
@@ -14,13 +14,10 @@ fehler = "1.0.0"
 sysinfo = "0.29.0"
 crossbeam = "0.8"
 
-nifpga-sys = { git = "https://github.com/mattia-donato/nifpga-win-rs"} # "PLEASE USE THE VERSION ON THE "
-nifpga-type-macro = { git = "https://github.com/mattia-donato/nifpga-win-rs"} # "0.1.3"
-nifpga = { git = "https://github.com/mattia-donato/nifpga-win-rs"} # "0.1.3"
+nifpga-dll-sys = "0.1.6"
+nifpga-dll-type-macro = "0.1.6"
+nifpga-dll = "0.1.6"
 
-#nifpga-sys = { path = "../nifpga-rs-dbtaylor/nifpga-sys" } # "0.1.3"
-#nifpga-type-macro = { path = "../nifpga-rs-dbtaylor/nifpga-type-macro" } # "0.1.3"
-#nifpga = { path = "../nifpga-rs-dbtaylor/nifpga" } # "0.1.3"
 zmq = "0.10.0"
 
 [build-dependencies]

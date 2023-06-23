@@ -1,4 +1,4 @@
-extern crate nifpga;
+extern crate nifpga_dll;
 
 use std::path::PathBuf;
 use std::process;
@@ -13,7 +13,7 @@ use std::time::Instant;
 use crossbeam;
 
 use clap::{Parser};
-use nifpga::{NifpgaError, Session, ReadFifo, WriteFifo, ReadElements};
+use nifpga_dll::{NifpgaError, Session, ReadFifo, WriteFifo, ReadElements};
 
 
 #[derive(Parser)]
